@@ -235,3 +235,66 @@ docker compose up --build
 ```
 
 ---
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/health` | Redis + memory healthcheck |
+| `GET` | `/stats` | Agent performance stats |
+| `POST` | `/incidents` | Trigger agent with alert payload |
+| `GET` | `/incidents` | List all incidents |
+| `GET` | `/incidents/{id}` | Get specific incident result |
+| `POST` | `/incidents/test/P1` | Fire sample P1 alert (demo) |
+
+**Swagger UI:** http://localhost:8000/docs
+
+---
+
+## LangSmith Tracing
+
+Every agent run is fully traced — every node, every LLM call, every tool invocation.
+
+```bash
+# Add to .env:
+LANGCHAIN_API_KEY=ls__your_key_here
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_PROJECT=incident-response-agent
+```
+
+Get a free key at https://smith.langchain.com
+
+---
+
+## Incidents Handled
+
+The agent handles three real-world scenarios out of the box:
+
+**P0 — auth-service outage**
+- Redis pod OOMKilled → all logins fail
+- Agent: restart Redis + auth-service
+
+**P1 — checkout-service high error rate**
+- Missing DB index after deployment → connection pool exhausted
+- Agent: rollback deployment
+
+**P2 — search latency elevated**
+- Elasticsearch shard rebalancing
+- Agent: monitor, self-resolves in 15 min
+
+---
+
+## Swapping Mocks for Real Integrations
+
+Each tool in `agent/tools.py` has the real production implementation commented alongside the mock:
+
+```python
+# Production — one env var swap:
+DATADOG_API_KEY=...       # real log queries
+PAGERDUTY_API_KEY=...     # real pages
+SLACK_BOT_TOKEN=...       # real Slack messages
+JIRA_URL + JIRA_TOKEN=... # real tickets
+PROMETHEUS_URL=...        # real metrics
+```
+
+---
