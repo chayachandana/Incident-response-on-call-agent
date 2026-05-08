@@ -1,4 +1,3 @@
-# agent/listener.py
 """
 Main entrypoint for the event-driven agent.
 
@@ -16,7 +15,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from agent.redis_queue import subscribe_and_run
-from agent.graph import run_incident   # you already have this from v1
+from agent.graph import run_incident   
 
 
 def handle_alert(alert: dict):
@@ -28,16 +27,16 @@ def handle_alert(alert: dict):
     try:
         result = run_incident(alert)
 
-        print(f"\n✅ Incident handled.")
+        print(f"\n Incident handled.")
         print(f"   Severity  : {result['severity']}")
         print(f"   Team paged: {result['team_paged']}")
         print(f"   Ticket    : {result['ticket_id']}")
         print(f"   Status    : {result['status']}")
-        print(f"\n📋 Report preview:")
+        print(f"\n Report preview:")
         print(result["incident_report"][:400] + "...")
 
     except Exception as e:
-        print(f"❌ Agent error: {e}")
+        print(f" Agent error: {e}")
         raise
 
 
