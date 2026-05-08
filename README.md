@@ -17,7 +17,7 @@ Modern distributed systems generate thousands of alerts daily. When something br
 - Paging the right team
 - Writing up the incident
 
-**This agent handles that first response automatically — investigating the logs, finding the root cause, attempting a fix, and paging the right team.**
+**This agent handles that first response automatically investigating the logs, finding the root cause, attempting a fix, and paging the right team.**
 
 ---
 ## Demo
@@ -31,10 +31,10 @@ curl -X POST http://localhost:8000/incidents/test/P1
 
 # Watch the agent work in Terminal 1:
 # 🚨 [ingest_alert]       Severity: P1 | Services: checkout-service
-# 🧠 [recall_memory]      Found INC-2831 (89% match) — same issue 2 weeks ago
+# 🧠 [recall_memory]      Found INC-2831 (89% match) - same issue 2 weeks ago
 # 🔍 [fetch_evidence]     12 logs, 7 metrics fetched
-# 🧠 [analyze_root_cause] Confidence: 94% — DB pool exhaustion
-# ✅  Confidence >= 92% — proceeding
+# 🧠 [analyze_root_cause] Confidence: 94% - DB pool exhaustion
+# ✅  Confidence >= 92% - proceeding
 # 📖 [fetch_runbook]      Matched: DB Connection Pool Exhaustion (91%)
 # 🤖 [auto_remediate]     Rolling back checkout-service deployment
 # ✅  Rollback successful
@@ -50,6 +50,8 @@ curl -X POST http://localhost:8000/incidents/test/P1
 ---
 
 ## Architecture
+
+![Architecture](architecture.png)
 
 ```
 Alert Sources (PagerDuty / Datadog / API / CLI)
@@ -68,7 +70,7 @@ Alert Sources (PagerDuty / Datadog / API / CLI)
     │  3. fetch_evidence            │
     │     logs + Prometheus metrics │
     │                               │
-    │  4. analyze_root_cause        │◄──── Ollama (mistral — local LLM)
+    │  4. analyze_root_cause        │◄──── Ollama (mistral - local LLM)
     │     confidence loop:          │
     │     while confidence < 0.92:  │
     │       re-fetch wider window   │
@@ -97,7 +99,7 @@ Alert Sources (PagerDuty / Datadog / API / CLI)
 ## Key Features
 
 ### 1. Event-Driven Architecture
-Alerts arrive via Redis pub/sub — the agent subscribes and fires automatically. No polling, no manual triggers in production.
+Alerts arrive via Redis pub/sub - the agent subscribes and fires automatically. No polling, no manual triggers in production.
 
 ### 2. Confidence-Based Reasoning Loop
 ```python
@@ -115,10 +117,10 @@ else:
 The agent never acts when it's uncertain. It keeps gathering evidence until confident or escalates.
 
 ### 3. RAG Runbook Retrieval
-All runbooks are stored as markdown files, embedded into ChromaDB using `sentence-transformers`. When an incident happens, the agent does semantic search — not keyword matching — to find the most relevant playbook.
+All runbooks are stored as markdown files, embedded into ChromaDB using `sentence-transformers`. When an incident happens, the agent does semantic search - not keyword matching - to find the most relevant playbook.
 
 ### 4. Incident Memory
-Every resolved incident is stored in a separate ChromaDB collection. When a new incident arrives, the agent recalls similar past events and injects them into its reasoning prompt — getting faster and more accurate over time.
+Every resolved incident is stored in a separate ChromaDB collection. When a new incident arrives, the agent recalls similar past events and injects them into its reasoning prompt - getting faster and more accurate over time.
 
 ### 5. Auto-Remediation
 ```python
@@ -128,10 +130,10 @@ if confidence >= 0.92 and rule_matched:
     scale_pods(replicas=6) # kubectl scale
     clear_cache()          # redis-cli FLUSHDB
 ```
-Real `kubectl` calls — not simulated. In mock mode they return realistic responses.
+Real `kubectl` calls - not simulated. In mock mode they return realistic responses.
 
 ### 6. Runs Fully Local
-Uses Ollama to run Mistral locally — no OpenAI API key, no data leaving your network, zero cost at scale. Critical for enterprise use cases where logs and incidents contain sensitive data.
+Uses Ollama to run Mistral locally - no OpenAI API key, no data leaving your network, zero cost at scale. Critical for enterprise use cases where logs and incidents contain sensitive data.
 
 ---
 
@@ -140,7 +142,7 @@ Uses Ollama to run Mistral locally — no OpenAI API key, no data leaving your n
 | Layer | Technology |
 |---|---|
 | Agent orchestration | LangGraph (StateGraph) |
-| Local LLM | Ollama — Mistral / Llama 3.1 / DeepSeek |
+| Local LLM | Ollama - Mistral / Llama 3.1 / DeepSeek |
 | Vector DB | ChromaDB + sentence-transformers |
 | Queue | Redis pub/sub |
 | API | FastAPI + Uvicorn |
@@ -155,8 +157,8 @@ Uses Ollama to run Mistral locally — no OpenAI API key, no data leaving your n
 ```
 incident-response-agent-v2/
 ├── agent/
-│   ├── state.py          # TypedDict — shared agent brain
-│   ├── graph.py          # LangGraph — 10 nodes + confidence loop
+│   ├── state.py          # TypedDict - shared agent brain
+│   ├── graph.py          # LangGraph - 10 nodes + confidence loop
 │   ├── tools.py          # External integrations (logs, PD, Slack, Jira)
 │   ├── llm.py            # Ollama setup + MockLLM
 │   ├── reasoner.py       # Confidence scoring + prompt engineering
@@ -192,7 +194,7 @@ incident-response-agent-v2/
 ### Prerequisites
 - Python 3.11+
 - Redis (`brew install redis`)
-- Ollama (`brew install ollama`) — optional, USE_MOCK_LLM=1 skips it
+- Ollama (`brew install ollama`) - optional, USE_MOCK_LLM=1 skips it
 
 ### Quick Start
 
@@ -204,7 +206,7 @@ pip install -r requirements.txt
 
 # 2. Configure
 cp .env.example .env
-# Edit .env — set USE_MOCK_LLM=1 for demo without Ollama
+# Edit .env - set USE_MOCK_LLM=1 for demo without Ollama
 
 # 3. Ingest runbooks into ChromaDB
 python -m agent.rag
@@ -215,15 +217,15 @@ python -m agent.memory
 # 5. Start Redis
 brew services start redis
 
-# 6. Start everything — needs 3 terminals
+# 6. Start everything - needs 3 terminals
 
-# Terminal 1 — API server
+# Terminal 1 - API server
 uvicorn api.main:app --reload --port 8000
 
-# Terminal 2 — Agent listener (waits for alerts)
+# Terminal 2 - Agent listener (waits for alerts)
 python -m agent.listener
 
-# Terminal 3 — Fire a test alert (after Terminal 2 shows "Waiting for alerts...")
+# Terminal 3 - Fire a test alert (after Terminal 2 shows "Waiting for alerts...")
 python scripts/publish_alert.py --sev P1
 
 # Or fire via curl instead of Terminal 3:
@@ -261,7 +263,7 @@ docker compose up --build
 
 ## LangSmith Tracing
 
-Every agent run is fully traced — every node, every LLM call, every tool invocation.
+Every agent run is fully traced - every node, every LLM call, every tool invocation.
 
 ```bash
 # Add to .env:
@@ -278,15 +280,15 @@ Get a free key at https://smith.langchain.com
 
 The agent handles three real-world scenarios out of the box:
 
-**P0 — auth-service outage**
+**P0 - auth-service outage**
 - Redis pod OOMKilled → all logins fail
 - Agent: restart Redis + auth-service
 
-**P1 — checkout-service high error rate**
+**P1 - checkout-service high error rate**
 - Missing DB index after deployment → connection pool exhausted
 - Agent: rollback deployment
 
-**P2 — search latency elevated**
+**P2 - search latency elevated**
 - Elasticsearch shard rebalancing
 - Agent: monitor, self-resolves in 15 min
 
@@ -297,7 +299,7 @@ The agent handles three real-world scenarios out of the box:
 Each tool in `agent/tools.py` has the real production implementation commented alongside the mock:
 
 ```python
-# Production — one env var swap:
+# Production - one env var swap:
 DATADOG_API_KEY=...       # real log queries
 PAGERDUTY_API_KEY=...     # real pages
 SLACK_BOT_TOKEN=...       # real Slack messages
@@ -332,18 +334,18 @@ python -m agent.listener
 Not a chatbot you ask "what's wrong with my service."
 
 The agent receives an alert, goes and looks at the actual logs and metrics 
-itself, figures out what broke and why, then acts on it — rollback, restart, 
-scale — without being asked. That's the part that felt worth building.
+itself, figures out what broke and why, then acts on it - rollback, restart, 
+scale - without being asked. That's the part that felt worth building.
 
 ---
 
 ## Known limitations
 
-- All integrations are mocked by default — real Datadog, PagerDuty, 
+- All integrations are mocked by default - real Datadog, PagerDuty, 
   and Slack need API keys wired into `.env`
-- Confidence threshold (0.92) is tuned for MockLLM — needs calibration 
+- Confidence threshold (0.92) is tuned for MockLLM - needs calibration 
   when running real Ollama against production logs
-- Incident memory is local ChromaDB — not shared across multiple agent instances yet
+- Incident memory is local ChromaDB not shared across multiple agent instances yet
 - kubectl remediation calls need a real cluster pointed at `~/.kube/config`
 
 ## What's next
@@ -352,7 +354,7 @@ scale — without being asked. That's the part that felt worth building.
 - [ ] Add Slack slash command to manually trigger investigation
 - [ ] Calibrate confidence scoring against real Ollama responses
 - [ ] Kubernetes integration tests against a local kind cluster
-- [ ] Multi-agent parallelism — separate agents per service
+- [ ] Multi-agent parallelism - separate agents per service
 
 ## License
 
