@@ -1,4 +1,3 @@
-# scripts/publish_alert.py
 """
 Test script: publish a mock alert to Redis.
 Run this in one terminal while the agent is listening in another.
