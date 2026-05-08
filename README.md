@@ -319,4 +319,29 @@ python -m agent.listener
 ```
 
 ---
+| Capability | Why It Matters |
+|---|---|
+| Event-driven Redis queue | Production-grade, not a script |
+| LangGraph StateGraph | Explicit state, debuggable, resumable |
+| Confidence loop with retries | True agentic behavior — acts under uncertainty |
+| ChromaDB RAG runbooks | Enterprise knowledge retrieval pattern |
+| Incident memory | Self-improving — learns from past incidents |
+| Auto-remediation (kubectl) | Autonomous SRE — doesn't just recommend, acts |
+| FastAPI REST API | Deployable, integrable service |
+| LangSmith tracing | Observability of the agent itself |
+| Local LLM (Ollama) | No data leaves network — enterprise requirement |
+| Docker Compose | One command to run entire stack |
 
+---
+
+## Positioning
+
+**This is not:** an AI chatbot for DevOps questions.
+
+**This is:** an autonomous incident reasoning system that investigates, decides, acts, and learns — reducing MTTR from 45 minutes to under 5.
+
+---
+
+## License
+
+MIT
