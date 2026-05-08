@@ -1,7 +1,7 @@
 ## Incident-response-on-call-agent
 
 
-> ## Built this after reading too many postmortems about 3am pages that took forever to resolve. Wanted to see how far an agent could get autonomously before needing a human — turns out pretty far.
+> ## On-call alert fatigue is one of the biggest pain points in production engineering. This project explores how far an autonomous agent can get in incident response before needing a human in the loop.
 >
 > Stack: LangGraph · Ollama · ChromaDB · Redis · FastAPI
 
