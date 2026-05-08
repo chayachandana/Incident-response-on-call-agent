@@ -32,9 +32,6 @@ from typing import Optional
 AUTO_REMEDIATE_THRESHOLD = 0.92   # below this → escalate instead
 
 
-# ─────────────────────────────────────────────
-# TOOL 1: Restart Service
-# ─────────────────────────────────────────────
 
 def restart_service(
     service: str,
@@ -123,9 +120,6 @@ def restart_service(
                 "success": False, "message": "kubectl not found — is it installed?"}
 
 
-# ─────────────────────────────────────────────
-# TOOL 2: Rollback Deployment
-# ─────────────────────────────────────────────
 
 def rollback_deployment(
     service: str,
@@ -186,9 +180,6 @@ def rollback_deployment(
                 "success": False, "message": str(e)}
 
 
-# ─────────────────────────────────────────────
-# TOOL 3: Scale Pods
-# ─────────────────────────────────────────────
 
 def scale_pods(
     service: str,
@@ -249,9 +240,6 @@ def scale_pods(
                 "success": False, "message": str(e)}
 
 
-# ─────────────────────────────────────────────
-# TOOL 4: Clear Cache
-# ─────────────────────────────────────────────
 
 def clear_cache(
     service: str,
@@ -306,10 +294,6 @@ def clear_cache(
         return {"action": "clear_cache", "service": service,
                 "success": False, "message": str(e)}
 
-
-# ─────────────────────────────────────────────
-# REMEDIATION PLANNER
-# ─────────────────────────────────────────────
 
 # Maps root cause keywords → remediation action
 REMEDIATION_RULES = [
