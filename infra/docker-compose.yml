@@ -1,0 +1,63 @@
+# infra/docker-compose.yml
+version: "3.9"
+
+services:
+
+  redis:
+    image: redis:7-alpine
+    container_name: incident_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  agent:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+    container_name: incident_agent
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - USE_MOCK_LLM=${USE_MOCK_LLM:-1}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-mistral}
+      - LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY}
+      - LANGCHAIN_TRACING_V2=${LANGCHAIN_TRACING_V2:-false}
+      - LANGCHAIN_PROJECT=${LANGCHAIN_PROJECT:-incident-agent}
+    volumes:
+      - ../.chromadb:/app/.chromadb
+      - ../.chromadb_memory:/app/.chromadb_memory
+    command: python -m agent.listener
+
+  api:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+    container_name: incident_api
+    depends_on:
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - USE_MOCK_LLM=${USE_MOCK_LLM:-1}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-mistral}
+      - LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY}
+      - LANGCHAIN_TRACING_V2=${LANGCHAIN_TRACING_V2:-false}
+      - LANGCHAIN_PROJECT=${LANGCHAIN_PROJECT:-incident-agent}
+    volumes:
+      - ../.chromadb:/app/.chromadb
+      - ../.chromadb_memory:/app/.chromadb_memory
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  redis_data:
