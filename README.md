@@ -298,3 +298,25 @@ PROMETHEUS_URL=...        # real metrics
 ```
 
 ---
+
+## Running with Real Ollama
+
+```bash
+# Install and pull model
+brew install ollama
+ollama pull mistral        # recommended
+# or: ollama pull llama3.1
+# or: ollama pull deepseek-coder
+
+# Start Ollama
+ollama serve
+
+# Remove mock flag from .env
+USE_MOCK_LLM=   # leave empty
+
+# Run agent
+python -m agent.listener
+```
+
+---
+
