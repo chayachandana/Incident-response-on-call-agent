@@ -137,12 +137,10 @@ def store_incident(state: dict) -> str:
 
     incident_id = state.get("ticket_id") or f"INC-{uuid.uuid4().hex[:6].upper()}"
 
-    # Build a rich text document for embedding
-    # This is what gets semantically searched later
+
     document = _build_memory_document(state)
 
-    # Metadata stored alongside the embedding
-    # ChromaDB metadata must be str/int/float — no nested objects
+    # Metadata stored alongside the embedding for filtering and display during recall
     metadata = {
         "incident_id":  incident_id,
         "title":        state.get("alert", {}).get("title", "")[:200],
@@ -162,12 +160,12 @@ def store_incident(state: dict) -> str:
             documents=[document],
             metadatas=[metadata],
         )
-        print(f"[memory] ✅ Stored incident {incident_id} in memory")
+        print(f"[memory]  Stored incident {incident_id} in memory")
         print(f"         Total incidents in memory: {collection.count()}")
         return incident_id
 
     except Exception as e:
-        print(f"[memory] ❌ Failed to store incident: {e}")
+        print(f"[memory]  Failed to store incident: {e}")
         return incident_id
 
 
@@ -230,8 +228,6 @@ def format_memory_for_prompt(similar_incidents: list[dict]) -> str:
 
     return "\n".join(lines)
 
-
-# ── Seed memory with past incidents for demo ───────────────
 
 SEED_INCIDENTS = [
     {
@@ -300,7 +296,7 @@ def seed_memory(force: bool = False) -> int:
     for inc in SEED_INCIDENTS:
         store_incident(inc)
 
-    print(f"[memory] ✅ Seeded {len(SEED_INCIDENTS)} past incidents")
+    print(f"[memory]  Seeded {len(SEED_INCIDENTS)} past incidents")
     return collection.count()
 
 
