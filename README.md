@@ -148,3 +148,90 @@ Uses Ollama to run Mistral locally — no OpenAI API key, no data leaving your n
 | Remediation | kubectl + Docker SDK |
 
 ---
+
+## Project Structure
+
+```
+incident-response-agent-v2/
+├── agent/
+│   ├── state.py          # TypedDict — shared agent brain
+│   ├── graph.py          # LangGraph — 10 nodes + confidence loop
+│   ├── tools.py          # External integrations (logs, PD, Slack, Jira)
+│   ├── llm.py            # Ollama setup + MockLLM
+│   ├── reasoner.py       # Confidence scoring + prompt engineering
+│   ├── metrics.py        # Prometheus / Grafana queries
+│   ├── remediation.py    # kubectl restart / rollback / scale / cache
+│   ├── rag.py            # ChromaDB runbook ingestion + retrieval
+│   ├── memory.py         # ChromaDB incident memory store
+│   ├── redis_queue.py    # Redis pub/sub listener (auto-reconnect)
+│   └── listener.py       # Main entrypoint
+├── api/
+│   └── main.py           # FastAPI REST API
+├── runbooks/             # Markdown runbooks (embedded into ChromaDB)
+│   ├── db_connection_pool.md
+│   ├── redis_connection_failure.md
+│   ├── elasticsearch_rebalancing.md
+│   ├── high_error_rate.md
+│   └── memory_leak.md
+├── infra/
+│   ├── docker-compose.yml
+│   └── Dockerfile
+├── scripts/
+│   └── publish_alert.py  # Test: push alert to Redis
+├── .env.example
+├── requirements.txt
+├── start.sh
+└── README.md
+```
+
+---
+
+## Setup & Run
+
+### Prerequisites
+- Python 3.11+
+- Redis (`brew install redis`)
+- Ollama (`brew install ollama`) — optional, USE_MOCK_LLM=1 skips it
+
+### Quick Start
+
+```bash
+# 1. Clone and install
+git clone https://github.com/yourusername/incident-response-agent-v2
+cd incident-response-agent-v2
+pip install -r requirements.txt
+
+# 2. Configure
+cp .env.example .env
+# Edit .env — set USE_MOCK_LLM=1 for demo without Ollama
+
+# 3. Ingest runbooks into ChromaDB
+python -m agent.rag
+
+# 4. Seed incident memory
+python -m agent.memory
+
+# 5. Start Redis
+brew services start redis
+
+# 6. Start everything (two terminals)
+# Terminal 1:
+uvicorn api.main:app --reload --port 8000
+
+# Terminal 2:
+python -m agent.listener
+```
+
+### Or one command
+```bash
+chmod +x start.sh
+./start.sh
+```
+
+### Or Docker
+```bash
+cd infra
+docker compose up --build
+```
+
+---
