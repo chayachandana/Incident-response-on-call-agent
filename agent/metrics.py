@@ -1,4 +1,3 @@
-# agent/metrics.py
 """
 Metrics querying tool — Prometheus / Grafana / Datadog
 =======================================================
@@ -16,7 +15,7 @@ import random
 from datetime import datetime, timedelta
 
 
-# ── Prometheus query templates ──────────────────────────────
+#  Prometheus query templates 
 PROMETHEUS_QUERIES = {
     "error_rate": 'rate(http_requests_total{{service="{svc}",status=~"5.."}}[5m])',
     "latency_p99": 'histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{{service="{svc}"}}[5m]))',
