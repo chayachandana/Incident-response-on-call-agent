@@ -368,12 +368,12 @@ def save_to_memory(state: IncidentState) -> dict:
     store_incident(state)
     return {}
 
-# ── BUILD GRAPH ───────────────────────────────────────────────
+
 def build_graph():
     graph = StateGraph(IncidentState)
 
     graph.add_node("ingest_alert",       ingest_alert)
-    graph.add_node("recall_memory",      recall_memory)      # ← NEW
+    graph.add_node("recall_memory",      recall_memory)      
     graph.add_node("fetch_evidence",     fetch_evidence)
     graph.add_node("analyze_root_cause", analyze_root_cause)
     graph.add_node("fetch_runbook",      fetch_runbook)
@@ -382,7 +382,7 @@ def build_graph():
     graph.add_node("notify_slack",       notify_slack)
     graph.add_node("create_ticket",      create_ticket)
     graph.add_node("generate_report",    generate_report)
-    graph.add_node("save_to_memory",     save_to_memory)     # ← NEW
+    graph.add_node("save_to_memory",     save_to_memory)    
 
     graph.set_entry_point("ingest_alert")
 
