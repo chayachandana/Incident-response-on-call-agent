@@ -1,4 +1,3 @@
-# agent/redis_queue.py
 import redis
 import json
 import os
