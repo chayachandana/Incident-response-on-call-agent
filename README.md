@@ -1,8 +1,9 @@
 ## Incident-response-on-call-agent
 
 
-> **Autonomous SRE agent that reduces MTTR from 45 minutes to under 5.**
-> Built with LangGraph · Ollama (local LLM) · ChromaDB · Redis · FastAPI
+> ## Built this after reading too many postmortems about 3am pages that took forever to resolve. Wanted to see how far an agent could get autonomously before needing a human — turns out pretty far.
+>
+> Stack: LangGraph · Ollama · ChromaDB · Redis · FastAPI
 
 ---
 
@@ -16,7 +17,7 @@ Modern distributed systems generate thousands of alerts daily. When something br
 - Paging the right team
 - Writing up the incident
 
-**This agent does all of that automatically — in under 5 minutes — with no human required.**
+**This agent handles that first response automatically — investigating the logs, finding the root cause, attempting a fix, and paging the right team.**
 
 ---
 ## Demo
@@ -197,7 +198,7 @@ incident-response-agent-v2/
 
 ```bash
 # 1. Clone and install
-git clone https://github.com/yourusername/incident-response-agent-v2
+git clone https://github.com/chayachandana/incident-response-agent-v2
 cd incident-response-agent-v2
 pip install -r requirements.txt
 
@@ -214,12 +215,19 @@ python -m agent.memory
 # 5. Start Redis
 brew services start redis
 
-# 6. Start everything (two terminals)
-# Terminal 1:
+# 6. Start everything — needs 3 terminals
+
+# Terminal 1 — API server
 uvicorn api.main:app --reload --port 8000
 
-# Terminal 2:
+# Terminal 2 — Agent listener (waits for alerts)
 python -m agent.listener
+
+# Terminal 3 — Fire a test alert (after Terminal 2 shows "Waiting for alerts...")
+python scripts/publish_alert.py --sev P1
+
+# Or fire via curl instead of Terminal 3:
+curl -X POST http://localhost:8000/incidents/test/P1
 ```
 
 ### Or one command
@@ -318,29 +326,33 @@ USE_MOCK_LLM=   # leave empty
 python -m agent.listener
 ```
 
----
-| Capability | Why It Matters |
-|---|---|
-| Event-driven Redis queue | Production-grade, not a script |
-| LangGraph StateGraph | Explicit state, debuggable, resumable |
-| Confidence loop with retries | True agentic behavior — acts under uncertainty |
-| ChromaDB RAG runbooks | Enterprise knowledge retrieval pattern |
-| Incident memory | Self-improving — learns from past incidents |
-| Auto-remediation (kubectl) | Autonomous SRE — doesn't just recommend, acts |
-| FastAPI REST API | Deployable, integrable service |
-| LangSmith tracing | Observability of the agent itself |
-| Local LLM (Ollama) | No data leaves network — enterprise requirement |
-| Docker Compose | One command to run entire stack |
+
+## What this is NOT
+
+Not a chatbot you ask "what's wrong with my service."
+
+The agent receives an alert, goes and looks at the actual logs and metrics 
+itself, figures out what broke and why, then acts on it — rollback, restart, 
+scale — without being asked. That's the part that felt worth building.
 
 ---
 
-## Positioning
+## Known limitations
 
-**This is not:** an AI chatbot for DevOps questions.
+- All integrations are mocked by default — real Datadog, PagerDuty, 
+  and Slack need API keys wired into `.env`
+- Confidence threshold (0.92) is tuned for MockLLM — needs calibration 
+  when running real Ollama against production logs
+- Incident memory is local ChromaDB — not shared across multiple agent instances yet
+- kubectl remediation calls need a real cluster pointed at `~/.kube/config`
 
-**This is:** an autonomous incident reasoning system that investigates, decides, acts, and learns — reducing MTTR from 45 minutes to under 5.
+## What's next
 
----
+- [ ] Wire real Datadog log queries
+- [ ] Add Slack slash command to manually trigger investigation
+- [ ] Calibrate confidence scoring against real Ollama responses
+- [ ] Kubernetes integration tests against a local kind cluster
+- [ ] Multi-agent parallelism — separate agents per service
 
 ## License
 
