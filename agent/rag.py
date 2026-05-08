@@ -1,4 +1,3 @@
-# agent/rag.py
 """
 RAG Runbook Retrieval — ChromaDB
 =================================
@@ -29,8 +28,7 @@ RUNBOOKS_DIR   = os.getenv("RUNBOOKS_DIR", "runbooks")
 CHROMA_DB_PATH = os.getenv("CHROMA_DB_PATH", ".chromadb")
 COLLECTION_NAME = "runbooks"
 
-# Use local sentence-transformers model — no API key, runs on CPU
-EMBEDDING_MODEL = "all-MiniLM-L6-v2"   # fast, small, good for retrieval
+EMBEDDING_MODEL = "all-MiniLM-L6-v2"   
 
 
 def _get_collection():
@@ -56,7 +54,7 @@ def _chunk_markdown(content: str, chunk_size: int = 500) -> list[str]:
     Splits on section headers first, then by character limit.
     Overlap ensures context isn't lost at chunk boundaries.
     """
-    # Split on ## headers to keep sections together
+
     sections = []
     current = []
 
@@ -70,7 +68,6 @@ def _chunk_markdown(content: str, chunk_size: int = 500) -> list[str]:
     if current:
         sections.append("\n".join(current))
 
-    # If a section is too long, split by character with overlap
     chunks = []
     overlap = 100
 
@@ -97,7 +94,6 @@ def ingest_runbooks(force_reload: bool = False) -> int:
     """
     collection = _get_collection()
 
-    # Skip if already loaded (unless forced)
     if not force_reload and collection.count() > 0:
         print(f"[rag] ChromaDB already has {collection.count()} chunks — skipping ingest")
         print(f"      Use force_reload=True to re-embed")
@@ -156,7 +152,7 @@ def ingest_runbooks(force_reload: bool = False) -> int:
     )
 
     total = len(all_chunks)
-    print(f"[rag] ✅ Ingested {total} chunks from {len(runbook_files)} runbooks")
+    print(f"[rag]  Ingested {total} chunks from {len(runbook_files)} runbooks")
     return total
 
 
@@ -259,8 +255,6 @@ def _fallback_runbook() -> dict:
         "matched_chunks":  [],
     }
 
-
-# ── CLI: run this file directly to ingest runbooks ─────────
 
 if __name__ == "__main__":
     import argparse
