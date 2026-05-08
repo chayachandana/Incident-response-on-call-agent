@@ -29,7 +29,7 @@ def reason(
     metrics: list,
     previous_hypothesis: str = "",
     retry_count: int = 0,
-    similar_incidents: list = None,        # ← NEW
+    similar_incidents: list = None,        
 ) -> dict:
     """
     Run one reasoning iteration.
