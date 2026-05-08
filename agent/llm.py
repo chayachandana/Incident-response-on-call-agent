@@ -1,4 +1,3 @@
-# agent/llm.py
 """
 LLM Configuration — Ollama (local, no API key)
 ===============================================
