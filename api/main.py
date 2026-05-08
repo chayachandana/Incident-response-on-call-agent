@@ -1,4 +1,3 @@
-# api/main.py
 """
 FastAPI — Incident Response Agent API
 ======================================
@@ -32,12 +31,12 @@ from agent.redis_queue import publish_alert
 from agent.memory import recall_similar_incidents, _get_collection
 
 
-# ── App setup ──────────────────────────────────────────────
+# App setup 
 app = FastAPI(
     title="Incident Response Agent",
     description="Autonomous SRE agent — LangGraph + Ollama + ChromaDB",
     version="2.0.0",
-    docs_url="/docs",     # Swagger UI at localhost:8000/docs
+    docs_url="/docs",   
     redoc_url="/redoc",
 )
 
@@ -48,11 +47,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# In-memory store for active incidents (swap for Redis/DB in production)
 active_incidents: dict = {}
 
 
-# ── Request / Response models ───────────────────────────────
+# Request / Response models 
 
 class AlertPayload(BaseModel):
     title: str
@@ -100,7 +98,7 @@ class HealthResponse(BaseModel):
     timestamp: str
 
 
-# ── Helper: run agent in background ────────────────────────
+# Helper: run agent in background 
 
 def _run_agent_background(alert: dict, incident_id: str):
     """Run the agent and store result in active_incidents."""
@@ -134,7 +132,7 @@ def _run_agent_background(alert: dict, incident_id: str):
         }
 
 
-# ── ROUTES ──────────────────────────────────────────────────
+# ROUTES 
 
 @app.get("/health", response_model=HealthResponse, tags=["System"])
 async def health():
@@ -193,7 +191,7 @@ async def trigger_incident(
     try:
         publish_alert(alert_dict)
     except Exception:
-        pass  # Redis optional — agent runs directly via background task
+        pass  
 
     return {
         "incident_id": incident_id,
