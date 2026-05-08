@@ -1,4 +1,3 @@
-# agent/tools.py
 """
 Tool Definitions
 ================
@@ -19,10 +18,6 @@ import string
 from datetime import datetime, timedelta
 from typing import Optional
 
-
-# ─────────────────────────────────────────────
-# TOOL 1: Query Logs
-# ─────────────────────────────────────────────
 
 def query_logs(
     service: str,
@@ -107,10 +102,6 @@ def _mock_logs(service: str, window: int, severities: list) -> list:
 
     return sorted(logs, key=lambda x: x["timestamp"])
 
-
-# ─────────────────────────────────────────────
-# TOOL 2: Lookup Runbook
-# ─────────────────────────────────────────────
 
 def lookup_runbook(
     affected_services: list,
@@ -213,7 +204,6 @@ Page: search-oncall""",
         },
     }
 
-    # Keyword matching (Phase 5 replaces with semantic similarity)
     search_text = (root_cause_summary + " " + " ".join(affected_services)).lower()
     best_match = None
     best_score = 0
@@ -226,10 +216,6 @@ Page: search-oncall""",
 
     return best_match or runbooks["high_error_rate"]
 
-
-# ─────────────────────────────────────────────
-# TOOL 3: Page On-Call Team
-# ─────────────────────────────────────────────
 
 def page_team(
     services: list,
@@ -276,10 +262,6 @@ def page_team(
     }
 
 
-# ─────────────────────────────────────────────
-# TOOL 4: Post Slack Message
-# ─────────────────────────────────────────────
-
 def post_slack_message(
     channel: str,
     message: str,
@@ -306,10 +288,6 @@ def post_slack_message(
     print(f"   💬 Slack: Posted to {channel}")
     return thread_url
 
-
-# ─────────────────────────────────────────────
-# TOOL 5: Create Incident Ticket
-# ─────────────────────────────────────────────
 
 def create_incident_ticket(
     severity: str,
